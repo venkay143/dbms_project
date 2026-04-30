@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransactionSim Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1a4b8c;
+            --secondary-blue: #2c6cbf;
+            --accent-blue: #4a90e2;
+            --success-green: #28a745;
+            --warning-orange: #ff9800;
+            --danger-red: #dc3545;
+            --neutral-dark: #2d3748;
+            --neutral-light: #f7fafc;
+            --neutral-white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--neutral-light) 0%, #e8f2ff 100%);
+            min-height: 100vh;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            color: var(--neutral-white);
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-card {
+            background: var(--neutral-white);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .role-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .role-card.user::before { background: linear-gradient(90deg, var(--primary-blue), var(--accent-blue)); }
+        .role-card.admin::before { background: linear-gradient(90deg, var(--success-green), #34ce57); }
+        .role-card.auditor::before { background: linear-gradient(90deg, var(--warning-orange), #ffb347); }
+
+        .role-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        }
+
+        .login-card {
+            background: var(--neutral-white);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: none;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .sidebar {
+            background: var(--neutral-white);
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            min-height: 100vh;
+        }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--neutral-white);
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        .sidebar .nav-link {
+            color: var(--neutral-dark);
+            padding: 1rem 1.5rem;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: #e8f2ff;
+            border-left-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            background: var(--neutral-white);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--neutral-white);
+            border: none;
+            padding: 1.25rem 1.5rem;
+            border-radius: 12px 12px 0 0 !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            border: none;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .status-success { background: var(--success-green); }
+        .status-fraud { background: var(--danger-red); }
+        .status-refund { background: var(--warning-orange); }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .role-switcher {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Landing Page -->
+    <div id="landing-page" class="page active">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-exchange-alt me-2"></i>
+                    <span style="background: linear-gradient(135deg, #1a4b8c, #4a90e2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">TransactionSim Pro</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="hero-section">
+            <div class="container">
+                <div class="hero-content text-center">
+                    <h1 class="display-4 fw-bold mb-4">Enterprise Transaction Simulation System</h1>
+                    <p class="lead mb-5 opacity-90">Secure, real-time transaction processing with advanced fraud detection</p>
+                    
+                    <div class="row g-4 justify-content-center">
+                        <div class="col-md-4">
+                            <div class="card role-card user h-100" onclick="showLogin('user')">
+                                <div class="card-body text-center p-4">
+                                    <i class="fas fa-user-tie fa-3x mb-3" style="color: #1a4b8c;"></i>
+                                    <h4 class="fw-bold">Business User</h4>
+                                    <p class="text-muted">Process transactions and monitor activity</p>
+                                    <div class="mt-3">
+                                        <span class="btn btn-outline-primary">Access Portal</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card role-card admin h-100" onclick="showLogin('admin')">
+                                <div class="card-body text-center p-4">
+                                    <i class="fas fa-shield-alt fa-3x mb-3" style="color: #28a745;"></i>
+                                    <h4 class="fw-bold">Administrator</h4>
+                                    <p class="text-muted">Manage system operations and security</p>
+                                    <div class="mt-3">
+                                        <span class="btn btn-outline-primary">Admin Console</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card role-card auditor h-100" onclick="showLogin('auditor')">
+                                <div class="card-body text-center p-4">
+                                    <i class="fas fa-chart-line fa-3x mb-3" style="color: #ff9800;"></i>
+                                    <h4 class="fw-bold">Compliance Auditor</h4>
+                                    <p class="text-muted">Monitor transactions and generate reports</p>
+                                    <div class="mt-3">
+                                        <span class="btn btn-outline-primary">Audit Dashboard</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="login-page" class="page">
+        <div class="login-container">
+            <div class="card login-card">
+                <div class="card-header text-center">
+                    <h3 id="login-title">User Login</h3>
+                </div>
+                <div class="card-body">
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="#" onclick="showSignup()">Don't have an account? Sign up</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Page -->
+    <div id="signup-page" class="page">
+        <div class="login-container">
+            <div class="card login-card">
+                <div class="card-header text-center">
+                    <h3>Create Account</h3>
+                </div>
+                <div class="card-body">
+                    <form id="signup-form">
+                        <div class="mb-3">
+                            <label for="signup-name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="signup-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signup-email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="signup-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signup-password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="signup-password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signup-confirm" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="signup-confirm" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Create Account</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="#" onclick="showLogin(currentRole)">Already have an account? Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard-page" class="page">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar -->
+                <nav class="col-md-3 col-lg-2 sidebar">
+                    <div class="position-sticky">
+                        <div class="sidebar-header">
+                            <h4><i class="fas fa-exchange-alt me-2"></i>TransactionSim Pro</h4>
+                            <p class="mb-0" id="current-role-display">User Dashboard</p>
+                        </div>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#" onclick="showDashboardSection('overview')">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Overview
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="showDashboardSection('send-money')">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Money
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="showDashboardSection('transactions')">
+                                    <i class="fas fa-history me-2"></i>Transactions
+                                </a>
+                            </li>
+                            <li class="nav-item" id="admin-users-item" style="display: none;">
+                                <a class="nav-link" href="#" onclick="showDashboardSection('users')">
+                                    <i class="fas fa-users me-2"></i>User Management
+                                </a>
+                            </li>
+                            <li class="nav-item" id="admin-reports-item" style="display: none;">
+                                <a class="nav-link" href="#" onclick="showDashboardSection('reports')">
+                                    <i class="fas fa-flag me-2"></i>Reports
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+
+                <!-- Main Content -->
+                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                    <!-- Role Switcher -->
+                    <div class="role-switcher">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h4 class="mb-0" id="dashboard-title">User Dashboard</h4>
+                                <small>Welcome, <span id="user-name">User</span>!</small>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-light btn-sm" onclick="switchRole('user')">
+                                        <i class="fas fa-user me-1"></i>User View
+                                    </button>
+                                    <button class="btn btn-outline-light btn-sm" onclick="switchRole('admin')">
+                                        <i class="fas fa-shield-alt me-1"></i>Admin View
+                                    </button>
+                                    <button class="btn btn-outline-light btn-sm" onclick="switchRole('auditor')">
+                                        <i class="fas fa-chart-line me-1"></i>Auditor View
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Sections -->
+                    <div id="dashboard-sections">
+                        <!-- Overview Section -->
+                        <div id="overview-section" class="dashboard-section">
+                            <div class="row" id="analytics-cards">
+                                <!-- Analytics cards will be loaded here -->
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>Quick Actions</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <button class="btn btn-primary me-2" onclick="showDashboardSection('send-money')">
+                                                <i class="fas fa-paper-plane me-1"></i>Send Money
+                                            </button>
+                                            <button class="btn btn-outline-primary" onclick="showDashboardSection('transactions')">
+                                                <i class="fas fa-history me-1"></i>View Transactions
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>Recent Activity</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="recent-activity">
+                                                <!-- Recent activity will be loaded here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Send Money Section -->
+                        <div id="send-money-section" class="dashboard-section" style="display: none;">
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="fas fa-paper-plane me-2"></i>Send Money</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form id="send-money-form">
+                                                <div class="mb-3">
+                                                    <label for="recipient" class="form-label">Recipient Email</label>
+                                                    <input type="email" class="form-control" id="recipient" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="amount" class="form-label">Amount ($)</label>
+                                                    <input type="number" class="form-control" id="amount" min="0.01" step="0.01" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="description" class="form-label">Description</label>
+                                                    <textarea class="form-control" id="description" rows="2"></textarea>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">Send Money</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div id="transaction-result" class="card d-none">
+                                        <div class="card-header">
+                                            <h5 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Transaction Result</h5>
+                                        </div>
+                                        <div class="card-body text-center p-4">
+                                            <div id="result-icon" class="mb-3"></div>
+                                            <h4 id="result-title" class="fw-bold mb-2"></h4>
+                                            <p id="result-message" class="text-muted mb-3"></p>
+                                            <div id="report-section" class="d-none">
+                                                <button class="btn btn-warning btn-lg" onclick="reportTransaction()">
+                                                    <i class="fas fa-flag me-2"></i>Report to Security Team
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transactions Section -->
+                        <div id="transactions-section" class="dashboard-section" style="display: none;">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5><i class="fas fa-history me-2"></i>Transaction History</h5>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadTransactions()">
+                                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Recipient</th>
+                                                    <th>Amount</th>
+                                                    <th>Status</th>
+                                                    <th>Date</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="transactions-table">
+                                                <!-- Transactions will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Management Section (Admin Only) -->
+                        <div id="users-section" class="dashboard-section" style="display: none;">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5><i class="fas fa-users me-2"></i>User Management</h5>
+                                    <button class="btn btn-primary btn-sm" onclick="showAddUserModal()">
+                                        <i class="fas fa-plus me-1"></i>Add User
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>User ID</th>
+                                                    <th>Username</th>
+                                                    <th>Email</th>
+                                                    <th>Role</th>
+                                                    <th>Status</th>
+                                                    <th>Created</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="users-table">
+                                                <!-- Users will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reports Section (Admin Only) -->
+                        <div id="reports-section" class="dashboard-section" style="display: none;">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5><i class="fas fa-flag me-2"></i>User Reports</h5>
+                                    <span class="badge bg-danger" id="reports-count">0 New</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Report ID</th>
+                                                    <th>Transaction ID</th>
+                                                    <th>Reporter</th>
+                                                    <th>Reason</th>
+                                                    <th>Status</th>
+                                                    <th>Submitted</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="reports-table">
+                                                <!-- Reports will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div class="modal fade" id="reportModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Report Transaction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to report this transaction to the admin?</p>
+                    <div class="mb-3">
+                        <label for="report-reason" class="form-label">Reason for reporting</label>
+                        <textarea class="form-control" id="report-reason" rows="3" placeholder="Please provide details..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" onclick="submitReport()">Submit Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    // Frontend that integrates with backend PHP endpoints
+    // Use an absolute API base so requests go to the correct server path regardless of page location
+    const API_BASE = window.location.origin + '/experiment/backend/api/';
+        let currentRole = 'user';
+        let currentUser = null;
+        let currentTransactionId = null;
+
+        // Page Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function showLogin(role) {
+            currentRole = role;
+            document.getElementById('login-title').textContent = `${role.charAt(0).toUpperCase() + role.slice(1)} Login`;
+            showPage('login-page');
+        }
+
+        function showSignup() { showPage('signup-page'); }
+        function logout() { currentUser = null; showPage('landing-page'); }
+
+        // Login - call backend/login.php
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await fetch(API_BASE + 'login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    currentUser = data.user;
+                    initializeDashboard();
+                    showPage('dashboard-page');
+                } else {
+                    alert(data.message || 'Login failed');
+                }
+            } catch (err) {
+                alert('Network or server error during login');
+                console.error(err);
+            }
+        });
+
+        // Signup - calls backend/register.php (created below)
+        document.getElementById('signup-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+
+            if (password !== confirm) { alert('Passwords do not match'); return; }
+
+            try {
+                const res = await fetch(API_BASE + 'register.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Account created — please login');
+                    showLogin('user');
+                } else {
+                    alert(data.message || 'Signup failed');
+                }
+            } catch (err) {
+                alert('Network or server error during signup');
+                console.error(err);
+            }
+        });
+
+        function initializeDashboard() {
+            document.getElementById('user-name').textContent = currentUser.name;
+            document.getElementById('current-role-display').textContent = `${currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1)} Dashboard`;
+            document.getElementById('dashboard-title').textContent = `${currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1)} Dashboard`;
+
+            const isAdmin = currentUser.role === 'admin';
+            document.getElementById('admin-users-item').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('admin-reports-item').style.display = isAdmin ? 'block' : 'none';
+
+            loadDashboardData();
+            showDashboardSection('overview');
+        }
+
+        function switchRole(role) {
+            if (currentUser.role === 'admin') {
+                currentRole = role;
+                document.getElementById('current-role-display').textContent = `${role.charAt(0).toUpperCase() + role.slice(1)} View`;
+                document.getElementById('dashboard-title').textContent = `${role.charAt(0).toUpperCase() + role.slice(1)} View`;
+                loadDashboardData();
+            } else { alert('Only administrators can switch roles!'); }
+        }
+
+        function showDashboardSection(section) {
+            document.querySelectorAll('.dashboard-section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
+            document.getElementById(`${section}-section`).style.display = 'block';
+            // keep safe check for event target
+            try { event.target.classList.add('active'); } catch (e) {}
+
+            if (section === 'transactions') loadTransactions();
+            else if (section === 'users') loadUsers();
+            else if (section === 'reports') loadReports();
+        }
+
+        function loadDashboardData() { loadAnalytics(); loadRecentActivity(); }
+
+        // Load analytics from backend
+        async function loadAnalytics() {
+            try {
+                const res = await fetch(API_BASE + 'analytics.php');
+                const data = await res.json();
+                if (data.success) updateAnalyticsDashboard(data.analytics);
+            } catch (err) { console.error('Analytics load error', err); }
+        }
+
+        function updateAnalyticsDashboard(analytics) {
+            const viewRole = currentUser.role === 'admin' ? currentRole : currentUser.role;
+            let analyticsHTML = '';
+            if (viewRole === 'user') {
+                analyticsHTML = `
+                <div class="col-md-3"><div class="card bg-primary text-white"><div class="card-body"><div class="d-flex justify-content-between"><div><h6 class="card-title">Total Sent</h6><h3>$${(analytics.total_transactions || 0) * 100}</h3></div><i class="fas fa-exchange-alt fa-2x opacity-50"></i></div></div></div></div>
+                <div class="col-md-3"><div class="card bg-success text-white"><div class="card-body"><div class="d-flex justify-content-between"><div><h6 class="card-title">Successful</h6><h3>${analytics.success_transactions || 0}</h3></div><i class="fas fa-check-circle fa-2x opacity-50"></i></div></div></div></div>
+                <div class="col-md-3"><div class="card bg-warning text-white"><div class="card-body"><div class="d-flex justify-content-between"><div><h6 class="card-title">Pending</h6><h3>${analytics.refund_transactions || 0}</h3></div><i class="fas fa-clock fa-2x opacity-50"></i></div></div></div></div>
+                <div class="col-md-3"><div class="card bg-danger text-white"><div class="card-body"><div class="d-flex justify-content-between"><div><h6 class="card-title">Reported</h6><h3>${analytics.fraud_transactions || 0}</h3></div><i class="fas fa-flag fa-2x opacity-50"></i></div></div></div></div>
+                `;
+            } else {
+                analyticsHTML = `
+                <div class="col-md-3"><div class="card bg-primary text-white"><div class="card-body"><div class="d-flex justify-content-between"><div><h6 class="card-title">Total Users</h6><h3>${analytics.total_users || 0}</h3></div><i class="fas fa-users fa-2x opacity-50"></i></div></div></div></div>
+                <div class="col-md-3"><div class="card bg-success text-white"><div class="card-body"><div class="d-flex justify-content-between"><div><h6 class="card-title">Total Transactions</h6><h3>${analytics.total_transactions || 0}</h3></div><i class="fas fa-exchange-alt fa-2x opacity-50"></i></div></div></div></div>
+                <div class="col-md-3"><div class="card bg-warning text-white"><div class="card-body"><div class="d-flex justify-content-between"><div><h6 class="card-title">Pending Reports</h6><h3>${analytics.pending_reports || 0}</h3></div><i class="fas fa-flag fa-2x opacity-50"></i></div></div></div></div>
+                <div class="col-md-3"><div class="card bg-info text-white"><div class="card-body"><div class="d-flex justify-content-between"><div><h6 class="card-title">System Health</h6><h3>100%</h3></div><i class="fas fa-heartbeat fa-2x opacity-50"></i></div></div></div></div>
+                `;
+            }
+            document.getElementById('analytics-cards').innerHTML = analyticsHTML;
+        }
+
+        // Recent activity - use transactions from server (fetch last 3)
+        async function loadRecentActivity() {
+            try {
+                const res = await fetch(API_BASE + 'transactions.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: currentUser.role === 'admin' ? 'get_all' : 'get_user', user_id: currentUser.id })
+                });
+                const data = await res.json();
+                let activityHTML = '';
+                const recent = (data.transactions || []).slice(0,3);
+                if (recent.length === 0) activityHTML = '<p class="text-muted">No recent activity</p>';
+                else recent.forEach(tx => {
+                    activityHTML += `<div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2"><div><strong>$${parseFloat(tx.amount).toFixed(2)}</strong> to ${tx.receiver_email || tx.recipient || 'N/A'}<br><small class="text-muted">${new Date(tx.timestamp).toLocaleDateString()}</small></div><span class="status-badge status-${tx.status}">${tx.status}</span></div>`;
+                });
+                document.getElementById('recent-activity').innerHTML = activityHTML;
+            } catch (err) { console.error('Recent activity load error', err); }
+        }
+
+        // Send Money - call backend
+        document.getElementById('send-money-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const recipient = document.getElementById('recipient').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const description = document.getElementById('description').value;
+
+            try {
+                const res = await fetch(API_BASE + 'transactions.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'create', sender_id: currentUser.id, recipient_email: recipient, amount, description })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showTransactionResult(data.transaction);
+                    document.getElementById('send-money-form').reset();
+                    loadDashboardData();
+                } else alert(data.message || 'Transaction failed');
+            } catch (err) { alert('Network error. Please try again.'); console.error(err); }
+        });
+
+        function showTransactionResult(transaction) {
+            const resultCard = document.getElementById('transaction-result');
+            const icon = document.getElementById('result-icon');
+            const title = document.getElementById('result-title');
+            const message = document.getElementById('result-message');
+            const reportSection = document.getElementById('report-section');
+            resultCard.classList.remove('d-none');
+            currentTransactionId = transaction.id || transaction.transaction_id;
+            const status = transaction.status;
+            if (status === 'success') {
+                icon.innerHTML = '<i class="fas fa-check-circle fa-3x text-success"></i>';
+                title.textContent = 'Transaction Successful!';
+                message.textContent = `$${transaction.amount} sent to ${transaction.receiver_email || transaction.recipient}`;
+                reportSection.classList.add('d-none');
+            } else if (status === 'fraud') {
+                icon.innerHTML = '<i class="fas fa-exclamation-triangle fa-3x text-danger"></i>';
+                title.textContent = 'Potential Fraud Detected!';
+                message.textContent = 'This transaction has been flagged for suspicious activity.';
+                reportSection.classList.remove('d-none');
+            } else if (status === 'refund_pending') {
+                icon.innerHTML = '<i class="fas fa-undo fa-3x text-warning"></i>';
+                title.textContent = 'Refund Processing';
+                message.textContent = 'Transaction will be refunded within 30 days.';
+                reportSection.classList.remove('d-none');
+            }
+        }
+
+        // Load transactions (user or admin)
+        async function loadTransactions() {
+            try {
+                const viewRole = currentUser.role === 'admin' ? currentRole : currentUser.role;
+                const action = viewRole === 'user' ? 'get_user' : 'get_all';
+                const res = await fetch(API_BASE + 'transactions.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, user_id: currentUser.id })
+                });
+                const data = await res.json();
+                if (!data.success) { console.error('Failed to load transactions', data.message); return; }
+                const transactions = data.transactions || [];
+                let transactionsHTML = '';
+                if (transactions.length === 0) transactionsHTML = '<tr><td colspan="6" class="text-center text-muted">No transactions found</td></tr>';
+                else transactions.forEach(tx => {
+                    transactionsHTML += `<tr><td>${tx.transaction_id}</td><td>${currentUser.role === 'user' ? tx.receiver_email : (tx.sender_name || tx.sender_id)}</td><td>$${parseFloat(tx.amount).toFixed(2)}</td><td><span class="status-badge status-${tx.status}">${tx.status}</span></td><td>${new Date(tx.timestamp).toLocaleDateString()}</td><td>${(tx.status === 'fraud' || tx.status === 'refund_pending') && (currentUser.role === 'user') ? `<button class="btn btn-sm btn-warning" onclick="showReportModal(${tx.transaction_id})"><i class="fas fa-flag"></i> Report</button>` : ''}</td></tr>`;
+                });
+                document.getElementById('transactions-table').innerHTML = transactionsHTML;
+            } catch (err) { console.error('Error loading transactions', err); }
+        }
+
+        // Report submission
+        function showReportModal(transactionId) { currentTransactionId = transactionId; const modal = new bootstrap.Modal(document.getElementById('reportModal')); modal.show(); }
+
+        async function submitReport() {
+            const reason = document.getElementById('report-reason').value;
+            if (!reason.trim()) { alert('Please provide a reason for reporting'); return; }
+            try {
+                const res = await fetch(API_BASE + 'reports.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transaction_id: currentTransactionId, reporter_id: currentUser.id, reason })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
+                    modal.hide();
+                    document.getElementById('report-reason').value = '';
+                    alert('Report submitted successfully!');
+                    loadDashboardData();
+                    if (document.getElementById('transactions-section').style.display !== 'none') loadTransactions();
+                } else alert(data.message || 'Failed to submit report');
+            } catch (err) { alert('Network error submitting report'); console.error(err); }
+        }
+
+        function reportTransaction() { submitReport(); }
+
+        // Users & reports loading placeholders (can be extended with endpoints)
+        async function loadUsers() { document.getElementById('users-table').innerHTML = '<tr><td colspan="6">User list loading not implemented on backend</td></tr>'; }
+        async function loadReports() { document.getElementById('reports-table').innerHTML = '<tr><td colspan="6">Reports list loading not implemented on backend</td></tr>'; }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            // nothing until login
+        });
+    </script>
+</body>
+</html>
